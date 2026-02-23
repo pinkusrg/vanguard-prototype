@@ -201,7 +201,6 @@
         }
 
 
-        /* --- V2: Vanguard Friction Pause --- */
         .vanguard-overlay {
             background: rgba(30, 58, 138, 0.95);
             /* Deep calming blue overlay */
@@ -210,7 +209,7 @@
             display: flex;
             flex-direction: column;
             color: white;
-            padding: 60px 25px 40px 25px;
+            padding: 40px 20px 20px 20px;
             justify-content: space-between;
         }
 
@@ -260,9 +259,9 @@
         .timer-container {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 20px;
-            padding: 30px;
+            padding: 20px;
             text-align: center;
-            margin-bottom: auto;
+            margin-bottom: 20px;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
@@ -313,10 +312,10 @@
         }
 
         .anchor-question {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
             line-height: 1.4;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .anchor-btn {
@@ -479,6 +478,25 @@
                 display: none;
             }
         }
+
+        /* Responsive Fix for actual Mobile Phones */
+        @media (max-width: 500px) {
+            .device-frame {
+                width: 100vw;
+                height: 100vh;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .notch {
+                display: none;
+            }
+
+            body {
+                background: white;
+            }
+        }
     </style>
 </head>
 
@@ -506,7 +524,25 @@
         </div>
 
         <!-- Presentation Controls -->
-        <div style="margin-top: 20px; text-align: right;">
+        <div style="margin-top: 20px; text-align: right; display: flex; flex-direction: column; gap: 10px;">
+            <div
+                style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; text-align: left; margin-bottom: 10px;">
+                <div
+                    style="font-size: 12px; font-weight: bold; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px;">
+                    Presentation Calibration</div>
+                <div style="display: flex; gap: 8px;">
+                    <button id="btn-zoom-out"
+                        style="flex: 1; background: #334155; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer;">Zoom
+                        Out -</button>
+                    <button id="btn-zoom-reset"
+                        style="flex: 1; background: #475569; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer;">Reset
+                        Zoom</button>
+                    <button id="btn-zoom-in"
+                        style="flex: 1; background: #334155; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer;">Zoom
+                        In +</button>
+                </div>
+            </div>
+
             <button id="btn-restart"
                 style="background: rgba(255,255,255,0.1); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 10px 15px; font-size: 14px; cursor: pointer; transition: background 0.2s;">↻
                 Restart Simulation</button>
@@ -563,7 +599,7 @@
 
             <div class="timer-container">
                 <div class="countdown" id="timer">00:30</div>
-                <div class="timer-label">Cognitive De-escalation Active</div>
+                <div class="timer-label">Verifying Call Details</div>
             </div>
 
             <!-- Anchor card slides up slightly delayed -->
@@ -572,7 +608,8 @@
                 <div class="anchor-question">Is the person on the phone claiming to be Police/CBI and asking you to
                     "secure" your funds?</div>
                 <button id="btn-anchor-yes" class="anchor-btn btn-danger">🚨 Yes, they are</button>
-                <button id="btn-anchor-no" class="anchor-btn btn-safe">No, standard transfer</button>
+                <button id="btn-anchor-no" class="anchor-btn btn-safe" style="display: none;">No, standard
+                    transfer</button>
             </div>
         </div>
 
@@ -582,7 +619,8 @@
                     <div class="bridge-icon">🛑</div>
                 </div>
                 <div class="bridge-title">This is a Scam.</div>
-                <div class="bridge-body">The real Police or CBI will <b>never</b> ask you to transfer money to a "secure
+                <div class="bridge-body">The real Police or CBI will <b>never</b> ask you to transfer money to a
+                    "secure
                     vault" over a phone call.</div>
 
                 <div class="bridge-warning-box">
@@ -622,7 +660,29 @@
         const btnBridge = document.getElementById('btn-bridge');
         const btnRestart = document.getElementById('btn-restart');
 
+        const btnZoomIn = document.getElementById('btn-zoom-in');
+        const btnZoomOut = document.getElementById('btn-zoom-out');
+        const btnZoomReset = document.getElementById('btn-zoom-reset');
+        const deviceFrame = document.querySelector('.device-frame');
+
         let countdownInterval;
+        let currentScale = 1.0;
+
+        // Calibration Logic
+        btnZoomIn.addEventListener('click', () => {
+            currentScale += 0.1;
+            deviceFrame.style.transform = `scale(${currentScale})`;
+        });
+
+        btnZoomOut.addEventListener('click', () => {
+            currentScale -= 0.1;
+            deviceFrame.style.transform = `scale(${currentScale})`;
+        });
+
+        btnZoomReset.addEventListener('click', () => {
+            currentScale = 1.0;
+            deviceFrame.style.transform = `scale(1)`;
+        });
 
         // Transition V1 to V2
         btnPay.addEventListener('click', () => {
@@ -680,7 +740,8 @@
                 if (timeLeft <= 0) {
                     clearInterval(countdownInterval);
                     timerElement.innerText = "00:00";
-                    // Real implementation would unlock the "No" button here
+                    // Unlock the "No" button
+                    document.getElementById('btn-anchor-no').style.display = 'block';
                 }
             }, 1000);
         }
@@ -695,6 +756,7 @@
             // Reset UI states
             anchorCard.classList.remove('slide-up');
             timerElement.innerText = "00:30";
+            document.getElementById('btn-anchor-no').style.display = 'none';
             btnBridge.innerHTML = "<span>📞</span> Mute Call & Call 1930 CyberCrime";
             btnBridge.style.opacity = "1";
 
