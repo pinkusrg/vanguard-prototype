@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanguard - UI Prototype</title>
+    <!-- Modern Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            /* Tailwind slate-900 */
+            --gpay-blue: #1a73e8;
+            /* Google Blue */
+            --vanguard-blue: #1e3a8a;
+            /* Deep calming blue */
+            --vanguard-green: #047857;
+            /* Safe green */
+            --text-light: #f8fafc;
+            --text-dark: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            /* Subtle dark grid background for presentation */
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* The Mobile Device Frame */
+        .device-frame {
+            width: 375px;
+            height: 812px;
+            background: #ffffff;
+            border-radius: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            border: 8px solid #334155;
+        }
+
+        /* The Notch */
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background: #334155;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            z-index: 100;
+        }
+
+        /* --- View Container --- */
+        .view {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.5s ease;
+        }
+
+        .hidden {
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(1.05);
+            /* Slight zoom effect on hide */
+        }
+
+        .blurred {
+            filter: blur(8px) brightness(0.6);
+            pointer-events: none;
+        }
+
+        /* --- V1: Google Pay Replica --- */
+        .gpay-view {
+            background: #ffffff;
+            z-index: 10;
+        }
+
+        .gpay-header {
+            padding: 60px 20px 20px 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .back-arrow {
+            font-size: 24px;
+            margin-right: 20px;
+            color: #475569;
+            cursor: pointer;
+        }
+
+        .receiver-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .receiver-name {
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--text-dark);
+        }
+
+        .receiver-id {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .transfer-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .amount-input {
+            font-size: 60px;
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+        }
+
+        .amount-rupee {
+            font-size: 40px;
+            margin-right: -5px;
+        }
+
+        .bank-selector {
+            background: #f1f5f9;
+            padding: 15px 20px;
+            border-radius: 12px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: auto;
+        }
+
+        .bank-details {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .bank-icon {
+            width: 32px;
+            height: 32px;
+            background: #cbd5e1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .pay-button-container {
+            padding: 20px;
+            padding-bottom: 40px;
+        }
+
+        .pay-btn {
+            width: 100%;
+            background-color: var(--gpay-blue);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(26, 115, 232, 0.3);
+            transition: transform 0.1s;
+        }
+
+        .pay-btn:active {
+            transform: scale(0.98);
+        }
+
+
+        /* --- V2: Vanguard Friction Pause --- */
+        .vanguard-overlay {
+            background: rgba(30, 58, 138, 0.95);
+            /* Deep calming blue overlay */
+            backdrop-filter: blur(10px);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            color: white;
+            padding: 60px 25px 40px 25px;
+            justify-content: space-between;
+        }
+
+        .vanguard-header {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .shield-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            animation: pulse-soft 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-soft {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+        }
+
+        .vanguard-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .vanguard-subtitle {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #bfdbfe;
+            margin-bottom: 40px;
+        }
+
+        .timer-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .countdown {
+            font-size: 64px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .timer-label {
+            font-size: 14px;
+            color: #93c5fd;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* The Anchor Question Card */
+        .anchor-card {
+            background: white;
+            border-radius: 24px;
+            padding: 25px;
+            color: var(--text-dark);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            transform: translateY(100%);
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .anchor-card.slide-up {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .anchor-badge {
+            display: inline-block;
+            background: #f1f5f9;
+            color: #475569;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+
+        .anchor-question {
+            font-size: 20px;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 25px;
+        }
+
+        .anchor-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 12px;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fca5a5;
+        }
+
+        .btn-danger:active {
+            background: #fca5a5;
+        }
+
+        .btn-safe {
+            background: #f8fafc;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-safe:active {
+            background: #e2e8f0;
+        }
+
+
+        /* --- V3: Vanguard Agentic Bridging --- */
+        .vanguard-bridging {
+            background: linear-gradient(180deg, var(--vanguard-green) 0%, #064e3b 100%);
+            z-index: 60;
+            display: flex;
+            flex-direction: column;
+            color: white;
+            padding: 80px 25px 40px 25px;
+            text-align: center;
+        }
+
+        .bridge-icon-container {
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px auto;
+        }
+
+        .bridge-icon {
+            font-size: 48px;
+        }
+
+        .bridge-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .bridge-body {
+            font-size: 18px;
+            line-height: 1.5;
+            color: #d1fae5;
+            margin-bottom: 40px;
+        }
+
+        .bridge-warning-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: auto;
+            border-left: 4px solid #fbbf24;
+            text-align: left;
+        }
+
+        .bridge-warning-title {
+            color: #fbbf24;
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .bridge-warning-text {
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .action-btn-primary {
+            background: white;
+            color: var(--vanguard-green);
+            border: none;
+            border-radius: 30px;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .action-btn-secondary {
+            background: transparent;
+            color: #d1fae5;
+            border: none;
+            font-size: 16px;
+            font-weight: 500;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        /* Presentation Helper Text outside the phone */
+        .presentation-notes {
+            position: absolute;
+            right: calc(50% + 250px);
+            width: 300px;
+            color: #cbd5e1;
+        }
+
+        .note-step {
+            display: none;
+            background: rgba(30, 41, 59, 0.8);
+            padding: 20px;
+            border-radius: 16px;
+            border-left: 4px solid #38bdf8;
+            backdrop-filter: blur(10px);
+        }
+
+        .note-step.active {
+            display: block;
+        }
+
+        .note-title {
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .note-body {
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 1000px) {
+            .presentation-notes {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Presentation Notes for Judges/Video Recording -->
+    <div class="presentation-notes">
+        <div id="note-1" class="note-step active">
+            <div class="note-title">1. The Crisis Point</div>
+            <div class="note-body">The victim, under a fake 'Digital Arrest' threat, attempts to transfer ₹1 Lakh to a
+                'secure' RBI account. They are visibly shaking, which our telemetry detects. <br><br>👉 <i>Click 'Pay
+                    ₹1,00,000' to trigger Vanguard.</i></div>
+        </div>
+        <div id="note-2" class="note-step">
+            <div class="note-title">2. The Friction Pause</div>
+            <div class="note-body">Vanguard intercepts. Instead of a silent decline, it enforces a 30-second cognitive
+                de-escalation pause with calming UI. <br><br>It forces the user to answer an 'Anchor Question' to break
+                the hypnosis. <br><br>👉 <i>Wait a few seconds, then click "Yes, they are" on the warning card.</i>
+            </div>
+        </div>
+        <div id="note-3" class="note-step">
+            <div class="note-title">3. Agentic Bridging</div>
+            <div class="note-body">Vanguard confirms the scam, validates the fear, and offers immediate Agentic
+                Bridging: muting the scammer and jumping straight to the real CyberCrime authorities.</div>
+        </div>
+
+        <!-- Presentation Controls -->
+        <div style="margin-top: 20px; text-align: right;">
+            <button id="btn-restart"
+                style="background: rgba(255,255,255,0.1); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 10px 15px; font-size: 14px; cursor: pointer; transition: background 0.2s;">↻
+                Restart Simulation</button>
+        </div>
+    </div>
+
+    <!-- Mobile Device Frame -->
+    <div class="device-frame">
+        <div class="notch"></div>
+
+        <!-- VIEW 1: GPay Trap Screen -->
+        <div id="view-1" class="view gpay-view">
+            <div class="gpay-header">
+                <div class="back-arrow">←</div>
+                <div class="receiver-info">
+                    <div class="receiver-name">RBI Secure Vault - 4921</div>
+                    <div class="receiver-id">rbivault.mum@sbi</div>
+                </div>
+            </div>
+
+            <div class="transfer-body">
+                <div class="amount-input">
+                    <span class="amount-rupee">₹</span>1,00,000
+                </div>
+                <div
+                    style="color: #64748b; font-size: 14px; margin-bottom: 40px; background: #f1f5f9; padding: 8px 16px; border-radius: 20px;">
+                    Add note: "Safe Harbor"
+                </div>
+
+                <div class="bank-selector">
+                    <div class="bank-details">
+                        <div class="bank-icon">H</div>
+                        <div>
+                            <div style="font-weight: 600; color: var(--text-dark);">HDFC Bank ••• 4092</div>
+                            <div style="font-size: 12px; color: #64748b;">Checking Account</div>
+                        </div>
+                    </div>
+                    <div style="color: var(--gpay-blue); font-weight: bold;">▼</div>
+                </div>
+            </div>
+
+            <div class="pay-button-container">
+                <button id="btn-pay" class="pay-btn">Pay ₹1,00,000</button>
+            </div>
+        </div>
+
+        <!-- VIEW 2: Vanguard Friction Pause -->
+        <div id="view-2" class="view vanguard-overlay hidden">
+            <div class="vanguard-header">
+                <div class="shield-icon">🛡️</div>
+                <div class="vanguard-title">Transfer Paused</div>
+                <div class="vanguard-subtitle">Vanguard detected severe duress markers on your current voice call.</div>
+            </div>
+
+            <div class="timer-container">
+                <div class="countdown" id="timer">00:30</div>
+                <div class="timer-label">Cognitive De-escalation Active</div>
+            </div>
+
+            <!-- Anchor card slides up slightly delayed -->
+            <div id="anchor-card" class="anchor-card">
+                <div class="anchor-badge">Security Anchor</div>
+                <div class="anchor-question">Is the person on the phone claiming to be Police/CBI and asking you to
+                    "secure" your funds?</div>
+                <button id="btn-anchor-yes" class="anchor-btn btn-danger">🚨 Yes, they are</button>
+                <button id="btn-anchor-no" class="anchor-btn btn-safe">No, standard transfer</button>
+            </div>
+        </div>
+
+        <div id="view-3" class="view vanguard-bridging hidden">
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div class="bridge-icon-container">
+                    <div class="bridge-icon">🛑</div>
+                </div>
+                <div class="bridge-title">This is a Scam.</div>
+                <div class="bridge-body">The real Police or CBI will <b>never</b> ask you to transfer money to a "secure
+                    vault" over a phone call.</div>
+
+                <div class="bridge-warning-box">
+                    <div class="bridge-warning-title">Your Funds are Safe</div>
+                    <div class="bridge-warning-text">We have blocked this transfer. The person threatening you is a
+                        criminal, not an officer.</div>
+                </div>
+            </div>
+
+            <div style="margin-top: auto;">
+                <button id="btn-bridge" class="action-btn-primary">
+                    <span>📞</span> Mute Call & Call 1930 CyberCrime
+                </button>
+                <button id="btn-cancel" class="action-btn-secondary">Cancel the transfer</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Interaction Logic -->
+    <script>
+        // DOM Elements
+        const view1 = document.getElementById('view-1');
+        const view2 = document.getElementById('view-2');
+        const view3 = document.getElementById('view-3');
+        const anchorCard = document.getElementById('anchor-card');
+        const timerElement = document.getElementById('timer');
+
+        // Notes Elements
+        const note1 = document.getElementById('note-1');
+        const note2 = document.getElementById('note-2');
+        const note3 = document.getElementById('note-3');
+
+        // Buttons
+        const btnPay = document.getElementById('btn-pay');
+        const btnAnchorYes = document.getElementById('btn-anchor-yes');
+        const btnBridge = document.getElementById('btn-bridge');
+        const btnRestart = document.getElementById('btn-restart');
+
+        let countdownInterval;
+
+        // Transition V1 to V2
+        btnPay.addEventListener('click', () => {
+            // Blur the GPay screen
+            view1.classList.add('blurred');
+
+            // Show Vanguard overlay
+            view2.classList.remove('hidden');
+
+            // Update Presentation Notes
+            note1.classList.remove('active');
+            note2.classList.add('active');
+
+            // Start timer
+            startTimer();
+
+            // Slide up the anchor question after a short delay (for dramatic effect)
+            setTimeout(() => {
+                anchorCard.classList.add('slide-up');
+            }, 800);
+        });
+
+        // Transition V2 to V3
+        btnAnchorYes.addEventListener('click', () => {
+            clearInterval(countdownInterval);
+
+            // Hide V2
+            view2.classList.add('hidden');
+
+            // Show V3 (Bridging)
+            view3.classList.remove('hidden');
+
+            // Update Presentation Notes
+            note2.classList.remove('active');
+            note3.classList.add('active');
+        });
+
+        // Optional: Button feedback for the final screen
+        btnBridge.addEventListener('click', () => {
+            btnBridge.innerHTML = "Dialing 1930...";
+            btnBridge.style.opacity = "0.7";
+        });
+
+        // Timer Logic
+        function startTimer() {
+            let timeLeft = 30;
+
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+
+                // Format to 00:XX
+                const seconds = timeLeft < 10 ? '0' + timeLeft : timeLeft;
+                timerElement.innerText = `00:${seconds}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    timerElement.innerText = "00:00";
+                    // Real implementation would unlock the "No" button here
+                }
+            }, 1000);
+        }
+
+        // Restart Logic
+        btnRestart.addEventListener('click', () => {
+            // Reset Views
+            view1.classList.remove('blurred');
+            view2.classList.add('hidden');
+            view3.classList.add('hidden');
+
+            // Reset UI states
+            anchorCard.classList.remove('slide-up');
+            timerElement.innerText = "00:30";
+            btnBridge.innerHTML = "<span>📞</span> Mute Call & Call 1930 CyberCrime";
+            btnBridge.style.opacity = "1";
+
+            // Reset Notes
+            note3.classList.remove('active');
+            note1.classList.add('active');
+
+            if (countdownInterval) clearInterval(countdownInterval);
+        });
+    </script>
+</body>
+
+</html>
